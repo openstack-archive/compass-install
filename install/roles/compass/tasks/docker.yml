@@ -1,0 +1,61 @@
+---
+
+- name: load dynamic variable
+  include_vars: "{{ shared_dir }}/dynamic.yml"
+ 
+- name: create directory for docker and files
+  file: path=~/docker-compass/files state=directory
+
+- name: copy Dockerfile
+  copy: src=Dockerfile dest=~/docker-compass/Dockerfile mode=0644
+
+- name: copy start script
+  copy: src=start.sh
+        dest=~/docker-compass/files/start.sh
+        mode=0755
+
+- name: copy compass.pem
+  copy: src={{ shared_dir }}/keys/compass.pem
+        dest=~/docker-compass/files/compass.pem
+        mode=0644  
+
+- name: copy chef config
+  template: src=chef-icehouse.conf.j2 dest=~/docker-compass/files/chef-icehouse.conf
+            mode=0644
+
+- name: copy cobber conf
+  template: src=cobbler.conf.j2 dest=~/docker-compass/files/cobbler.conf
+            mode=0644
+
+- name: copy compass setting
+  template: src=compass.setting.j2 dest=~/docker-compass/files/compass.setting
+            mode=0644
+
+- name: copy Dockerfile
+  copy: src=Dockerfile dest=~/docker-compass/Dockerfile mode=0644
+ 
+- name: get containers
+  command: docker ps -a
+  register: containers
+
+- name: remove compass container if any
+  shell: docker rm compass-dev
+  when: containers.stdout.find('compass-dev') != -1
+
+- name: check if compass image already exists
+  command: docker images compass
+  register: image
+
+- name: remove image 'compass' if it exists and --rebuild is specified
+  shell: docker rmi -f compass
+  when: image.stdout.find('compass') != -1 and rebuild
+
+- name: build a docker image for compass
+  shell: docker build -t compass ~/docker-compass
+  when: image.stdout.find('compass') == -1 or rebuild
+
+- name: fork image and run a new compass container
+  shell: docker run --name=compass-dev -d {{ compass_port_mapping }} -i -t compass
+
+- name: remove dynamic generated vars
+  local_action: file path={{ shared_dir }} state=absent

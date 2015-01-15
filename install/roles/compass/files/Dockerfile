@@ -1,0 +1,12 @@
+FROM compassindocker/compass
+
+ADD files/start.sh /root/start.sh
+ADD files/compass.setting /etc/compass/setting
+ADD files/cobbler.conf /etc/compass/os_installer/cobbler.conf
+ADD files/chef-icehouse.conf /etc/compass/package_installer/chef-icehouse.conf
+ADD files/compass.pem /etc/compass.pem
+
+CMD ["/root/start.sh"]
+EXPOSE 80
+EXPOSE 123
+EXPOSE 3128

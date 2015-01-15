@@ -1,0 +1,55 @@
+---
+
+rebuild: True
+
+host_ip: 10.145.89.128
+chef_ip: 10.145.89.128
+
+dockerized_cobbler: True
+dockerized_chef: False
+shared_dir: "~/compass/shared"
+
+epel_6: "https://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm"
+# compass adapters
+compass_adapters: "git://git.openstack.org/stackforge/compass-adapters.git"
+
+## cobbler
+compass0_subnet: "192.168.100.1/24"
+compass0_subnet_ip: "192.168.100.0"
+compass0_subnet_mask: "255.255.255.0"
+compass0_router: "192.168.100.1"
+compass0_dhcp_range: "192.168.100.10 192.168.100.250"
+
+mgmt_subnet_ip: "10.145.88.0"
+mgmt_router: "10.145.88.1"
+mgmt_subnet_mask: "255.255.254.0"
+mgmt_dhcp_range: "10.145.88.10 10.145.89.250"
+
+cobbler_server: "10.145.89.128"
+
+# ports for cobbler
+cobbler_mapped_http_port_on_host: "8080"
+rsyslog_port_mapped_on_host: "12514"
+tftp_port: "69"
+xmlrpc_port: "25151"
+dns_port: "53"
+
+cobbler_port_mapping: -p {{ cobbler_mapped_http_port_on_host }}:80 -p {{ tftp_port }}:69/udp -p {{ dns_port }}:53/udp -p {{ xmlrpc_port }}:25151 -p {{ rsyslog_port_mapped_on_host }}:514
+
+# isos
+centos_url: "http://vault.centos.org/6.5/isos/x86_64/CentOS-6.5-x86_64-minimal.iso"
+ubuntu_url: "http://releases.ubuntu.com/12.04/ubuntu-12.04.4-server-amd64.iso"
+centos: "CentOS-6.5-x86_64"
+ubuntu: "Ubuntu-12.04-x86_64"
+
+# volume mapping for cobbler
+host_mount_point: "/root/docker-cobbler/images"
+container_mount_point: "/var/lib/cobbler/mount_point"
+image_volume_mapping: "-v {{ host_mount_point }}:{{ container_mount_point }}"
+
+# ports for compass
+compass_mapped_http_port_on_host: "5000"
+ntp_port: "123"
+proxy_port: "3128"
+
+compass_port_mapping: -p {{ compass_mapped_http_port_on_host }}:80 -p {{ ntp_port }}:123 -p {{ proxy_port }}:3128
