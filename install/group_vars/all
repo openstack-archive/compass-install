@@ -1,0 +1,159 @@
+---
+
+# Once rebuild is marked as True, all docker images and/or packages will be destroyed and re-established
+rebuild: True
+
+# Auto-generated IP values
+chef_server: "10.145.89.133"
+cobbler_server: "10.145.89.133"
+compass-server: "10.145.89.128"
+
+# Auto-generated
+dockerized_cobbler: True
+dockerized_chef: False
+
+# shared_dir on local machine
+shared_dir: "~/compass/shared"
+
+## default urls
+
+# centos
+epel_6: "https://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm"
+
+# compass adapters
+compass_adapters: "git://git.openstack.org/stackforge/compass-adapters.git"
+
+## cobbler
+# cidr for docker bridge: compass0
+compass0_subnet: "192.168.100.1/24"
+
+# subnet ip for docker bridge: compass0
+compass0_subnet_ip: "192.168.100.0"
+
+# subnet mask for docker bridge: compass0
+compass0_subnet_mask: "255.255.255.0"
+
+# router ip for docker bridge: compass0
+compass0_router: "192.168.100.1"
+
+# dhcp range for docker bridge: compass0
+compass0_dhcp_range: "192.168.100.10 192.168.100.250"
+
+# management subnet ip of the cluster you want to deploy
+mgmt_subnet_ip: "10.145.88.0"
+
+# management subnet router ip
+mgmt_router: "10.145.88.1"
+
+# management subnet subnet mask
+mgmt_subnet_mask: "255.255.254.0"
+
+# management subnet dhcp range
+mgmt_dhcp_range: "10.145.88.10 10.145.89.250"
+
+
+
+## ports for cobbler ##
+
+# http port on host that maps to the cobbler container
+cobbler_mapped_http_port_on_host: "8080"
+
+# rsyslog port on host that maps to the compass container
+rsyslog_port_mapped_on_host: "12514"
+
+# tftp port on host that maps to the cobbler container
+tftp_port: "69"
+
+# xmlrpc port on host that maps to the cobbler container
+xmlrpc_port: "25151"
+
+# dns port on host that maps to the cobbler container
+dns_port: "53"
+
+# port mapping as a paramter for running cobbler container
+cobbler_port_mapping: -p {{ cobbler_mapped_http_port_on_host }}:80 -p {{ tftp_port }}:69/udp -p {{ dns_port }}:53/udp -p {{ xmlrpc_port }}:25151 -p {{ rsyslog_port_mapped_on_host }}:514
+
+
+
+## ports for compass ##
+
+# http port on host that maps to the compass container
+compass_mapped_http_port_on_host: "5000"
+
+# ntp port on host that maps to the compass container
+ntp_port: "123"
+
+# squid proxy port on host that maps to the compass container
+proxy_port: "3128"
+
+# port mapping as a parameter for running compass container
+compass_port_mapping: -p {{ compass_mapped_http_port_on_host }}:80 -p {{ ntp_port }}:123 -p {{ proxy_port }}:3128
+
+
+## isos
+# centos iso url
+centos_url: "{{ centos_65_url }}"
+
+# ubuntu iso url
+ubuntu_url: "{{ ubuntu_1204_url }}"
+
+# centos 6.5 url
+centos_65_url: "https://s3-us-west-1.amazonaws.com/compass-local-repo/centos/6.5/CentOS-6.5-x86_64.iso"
+
+# ubuntu 12.04 url
+ubuntu_1204_url: "https://s3-us-west-1.amazonaws.com/compass-local-repo/ubuntu/12.04/Ubuntu-12.04-x86_64.iso"
+
+# os name of centos
+centos: "{{ centos_65 }}"
+
+# os name of ubuntu
+ubuntu: "{{ ubuntu_1204 }}"
+
+# centos 6.5 os name
+centos_65: "CentOS-6.5-x86_64"
+
+# ubuntu 12.04 os name
+ubuntu_1204: "Ubuntu-12.04-x86_64"
+
+
+
+##  volume mapping for cobbler ##
+
+# mount point for isos on cobbler host
+host_mount_point: "/root/docker-cobbler/images"
+
+# mount point inside cobbler container
+container_mount_point: "/var/lib/cobbler/mount_point"
+
+# combined mount syntax for docker run
+image_volume_mapping: "-v {{ host_mount_point }}:{{ container_mount_point }}"
+
+# log dir on cobbler host
+cobbler_host_log_dir: "/var/log/cobbler"
+
+# log dir inside cobbler container
+cobbler_container_log_dir: "/var/log/cobbler"
+
+# log the logs from container into host for future use
+log_volume_mapping: "-v {{ cobbler_host_log_dir }}:{{ cobbler_container_log_dir }}"
+
+
+
+##  volume mapping for compass ##
+
+# log dir on compass host
+compass_host_log_dir: "/var/log/compass"
+
+# log dir on inside compass container
+compass_container_log_dir: "/var/log/cobbler"
+
+# sync logs inside out of the container
+compass_volume_mapping: "-v {{ compass_host_log_dir }}:{{ compass_container_log_dir }}"
+
+
+
+## docker ##
+
+# install docker on ubuntu
+docker_apt_key_server: hkp://keyserver.ubuntu.com:80
+docker_apt_key: 36A1D7869245C8950F966E92D8576A8BA88D21E9
