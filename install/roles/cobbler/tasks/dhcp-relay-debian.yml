@@ -12,3 +12,5 @@
   lineinfile: dest=/etc/default/isc-dhcp-relay
               regexp='^INTERFACES'
               line='INTERFACES="compass0"'
+  notify:
+      restart dhcp-relay 
