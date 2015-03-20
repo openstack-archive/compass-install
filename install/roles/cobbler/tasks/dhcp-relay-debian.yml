@@ -7,10 +7,5 @@
   lineinfile: dest=/etc/default/isc-dhcp-relay
               regexp='^SERVERS'
               line='SERVERS="{{ cobbler_docker_ip }}"'
-
-- name: make dhcp-relay agetn listen on compass0
-  lineinfile: dest=/etc/default/isc-dhcp-relay
-              regexp='^INTERFACES'
-              line='INTERFACES="compass0"'
   notify:
       restart dhcp-relay

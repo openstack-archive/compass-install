@@ -4,7 +4,7 @@ ADD files/dhcp.template /etc/cobbler/dhcp.template
 ADD files/start.sh /root/start.sh
 ADD files/admin.pem /etc/cobbler/admin.pem
 ADD files/chef-validator.pem /etc/cobbler/chef-validator.pem 
-ADD files/fix_ks_server.py /var/lib/cobbler/sync/post/fix_ks_server.py
+ADD files/fix_ks_server.py /var/lib/cobbler/triggers/sync/post/fix_ks_server.py
 
 RUN chmod +x /root/start.sh
 CMD ["/root/start.sh"]
