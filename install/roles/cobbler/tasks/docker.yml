@@ -45,11 +45,16 @@
   when: mount_info.stdout.find('CentOS') == -1
 
 - name: copy Dockerfile to ~/docker-cobbler
-  copy: src=Dockerfile dest=~/docker-cobbler/Dockerfile mode=0644
+  template: src=Dockerfile.j2 dest=~/docker-cobbler/Dockerfile mode=0644
 
 - name: copy dhcp.template
   template: src=dhcp.template.j2
             dest=~/docker-cobbler/files/dhcp.template
+            mode=0644
+
+- name: copy named.template
+  template: src=named.template.j2
+            dest=~/docker-cobbler/files/named.template
             mode=0644
 
 - name: copy start script
@@ -66,11 +71,13 @@
   copy: src={{ shared_dir }}/keys/admin.pem
         dest=~/docker-cobbler/files/admin.pem
         mode=0644
+  when: "'chef' in {{ pkg_installer }}"
 
 - name: copy chef validator key
   copy: src={{ shared_dir }}/keys/chef-validator.pem
         dest=~/docker-cobbler/files/chef-validator.pem
         mode=0644 
+  when: "'chef' in {{ pkg_installer }}" 
 
 - name: cobbler container?
   command: docker ps -a
@@ -97,7 +104,7 @@
   when: image.stdout.find('cobbler') == -1 or rebuild
 
 - name: fork image and run a new cobbler container
-  shell: docker run --name=cobbler-dev -d {{ cobbler_port_mapping }} {{ image_volume_mapping }} {{ log_volume_mapping }} -i -t cobbler
+  shell: docker run --name=cobbler-dev -d {{ cobbler_port_mapping }} {{ image_volume_mapping }} -i -t cobbler
 
 - name: extract cobbler ip info
   shell: echo `docker inspect cobbler-dev | awk -F '"' '/IPAdd/ {print $4}'` > /tmp/ip
