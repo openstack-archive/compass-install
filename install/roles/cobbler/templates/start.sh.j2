@@ -2,6 +2,7 @@
 
 export ipaddr=$(ip addr show eth0 | grep 'inet ' | awk '{ print $2}'|cut -d/ -f1)
 sed -i "/^local-address/c\local-address $ipaddr;" /etc/cobbler/dhcp.template
+sed -i "s/listen-on port 53 { \$listen_ip; }/listen-on port 53 \{ $ipaddr; \}/g" /etc/cobbler/named.template
 sed -i "/^server/c\server: $ipaddr" /etc/cobbler/settings 
 sed -i "/^next_server/c\next_server: {{ cobbler_server }}" /etc/cobbler/settings
 

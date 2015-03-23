@@ -3,8 +3,10 @@ FROM compassindocker/compass
 ADD files/start.sh /root/start.sh
 ADD files/compass.setting /etc/compass/setting
 ADD files/cobbler.conf /etc/compass/os_installer/cobbler.conf
+{% if 'chef' in pkg_installer %}
 ADD files/chef-icehouse.conf /etc/compass/package_installer/chef-icehouse.conf
 ADD files/compass.pem /etc/compass.pem
+{% endif %}
 
 CMD ["/root/start.sh"]
 EXPOSE 80

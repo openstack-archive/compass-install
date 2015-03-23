@@ -13,7 +13,7 @@
   file: path=~/docker-compass/files state=directory
 
 - name: copy Dockerfile
-  copy: src=Dockerfile dest=~/docker-compass/Dockerfile mode=0644
+  template: src=Dockerfile.j2 dest=~/docker-compass/Dockerfile mode=0644
 
 - name: copy start script
   copy: src=start.sh
@@ -24,6 +24,7 @@
   copy: src={{ shared_dir }}/keys/compass.pem
         dest=~/docker-compass/files/compass.pem
         mode=0644  
+  when: "'chef' in {{ pkg_installer }}"
 
 - name: copy chef config
   template: src=chef-icehouse.conf.j2 dest=~/docker-compass/files/chef-icehouse.conf
@@ -37,9 +38,6 @@
   template: src=compass.setting.j2 dest=~/docker-compass/files/compass.setting
             mode=0644
 
-- name: copy Dockerfile
-  copy: src=Dockerfile dest=~/docker-compass/Dockerfile mode=0644
- 
 - name: get containers
   command: docker ps -a
   register: containers
