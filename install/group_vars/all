@@ -121,6 +121,12 @@ centos_65: "CentOS-6.5-x86_64"
 # ubuntu 12.04 os name
 ubuntu_1204: "Ubuntu-12.04-x86_64"
 
+# ubuntu 14.04 url
+ubuntu_1404_url: "https://s3-us-west-1.amazonaws.com/compass-local-repo/ubuntu/14.04/Ubuntu-14.04-x86_64.iso"
+
+# ubuntu 14.04 os name
+ubuntu_1404: "Ubuntu-14.04-x86_64"
+
 
 
 ##  volume mapping for cobbler ##

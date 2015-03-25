@@ -103,19 +103,27 @@ RUN rm -rf /var/lib/cobbler/repo_mirror/ubuntu_ppa_repo && \
     mkdir -p /var/lib/cobbler/repo_mirror/ubuntu_ppa_repo/conf && \
     mv /tmp/distributions /var/lib/cobbler/repo_mirror/ubuntu_ppa_repo/conf/distributions && \
     chmod 644 /var/lib/cobbler/repo_mirror/ubuntu_ppa_repo/conf/distributions && \
-    wget -O /var/lib/cobbler/repo_mirror/ubuntu_ppa_repo/chef_11.8.0-1.ubuntu.12.04_amd64.deb http://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef_11.8.0-1.ubuntu.12.04_amd64.deb 
+    wget -O /var/lib/cobbler/repo_mirror/ubuntu_ppa_repo/chef_11.8.0-1.ubuntu.12.04_amd64.deb http://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef_11.8.0-1.ubuntu.12.04_amd64.deb
+
+RUN rm -rf /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo && \
+    mkdir -p /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/conf && \
+    mv /tmp/distributions /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/conf/distributions && \
+    chmod 644 /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/conf/distributions && \
+    wget -O /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/chef_12.1.1-1_amd64.deb https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/13.04/x86_64/chef_12.1.1-1_amd64.deb
     
 
 # create repos
 WORKDIR /var/lib/cobbler/repo_mirror
 RUN createrepo centos_ppa_repo && \
-    find ubuntu_ppa_repo -name \*.deb -exec reprepro -Vb ubuntu_ppa_repo includedeb ppa {} \;
+    find ubuntu_ppa_repo -name \*.deb -exec reprepro -Vb ubuntu_ppa_repo includedeb ppa {} \; && \
+    find ubuntu_14_04_ppa_repo -name \*.deb -exec reprepro -Vb ubuntu_14_04_ppa_repo includedeb ppa {} \;
 
 # add repos to cobbler repo and get loaders
 RUN /usr/sbin/apachectl -k start && \
     /usr/bin/cobblerd start \& && \
     cobbler repo add --mirror=/var/lib/cobbler/repo_mirror/centos_ppa_repo --name=centos_ppa_repo --mirror-locally=Y --arch=x86_64 && \
     cobbler repo add --mirror=/var/lib/cobbler/repo_mirror/ubuntu_ppa_repo --name=ubuntu_ppa_repo --mirror-locally=Y --arch=x86_64 && \
+    cobbler repo add --mirror=/var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo --name=ubuntu_14_04_ppa_repo --mirror-locally=Y --arch=x86_64 && \
     cobbler reposync && \
     cobbler get-loaders
 

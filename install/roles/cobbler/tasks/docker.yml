@@ -25,12 +25,14 @@
   with_items:
     - "{{ centos }}"
     - "{{ ubuntu }}"
+    - "{{ ubuntu_1404 }}
 
 - name: download images
   get_url: url={{ item.name }} dest=/tmp/{{ item.filename }} mode=0644
   with_items:
     - { name: "{{ centos_url }}", filename: "{{ centos }}.iso" }
     - { name: "{{ ubuntu_url }}", filename: "{{ ubuntu }}.iso" }
+    - { name: "{{ ubuntu_1404_url }}", filename: "{{ ubuntu_1404 }}.iso" }
 
 - name: mount info
   command: mount
@@ -42,6 +44,7 @@
   with_items:
     - "{{ centos }}"
     - "{{ ubuntu }}"
+    - "{{ ubuntu_1404 }}"
   when: mount_info.stdout.find('CentOS') == -1
 
 - name: copy Dockerfile to ~/docker-cobbler
