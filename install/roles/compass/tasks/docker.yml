@@ -15,8 +15,12 @@
 - name: copy Dockerfile
   template: src=Dockerfile.j2 dest=~/docker-compass/Dockerfile mode=0644
 
+- name: copy switch machines file
+  template: src=switch_machines_file.j2 dest=~/docker-compass/files/switch_machines_file mode=0644
+  when: test
+
 - name: copy start script
-  copy: src=start.sh
+  template: src=start.sh.j2
         dest=~/docker-compass/files/start.sh
         mode=0755
 

@@ -5,8 +5,8 @@ rebuild: True
 
 # Auto-generated IP values
 chef_server: "10.145.81.208"
-cobbler_server: "10.145.81.208"
-compass-server: "10.145.81.208"
+cobbler_server: "10.1.0.11"
+compass-server: "10.1.0.11"
 
 # Auto-generated
 dockerized_cobbler: True
@@ -43,16 +43,16 @@ compass0_router: "192.168.101.1"
 compass0_dhcp_range: "192.168.101.150 192.168.101.160"
 
 # management subnet ip of the cluster you want to deploy
-mgmt_subnet_ip: "10.145.88.0"
+mgmt_subnet_ip: "10.1.0.0"
 
 # management subnet router ip
-mgmt_router: "10.145.88.1"
+mgmt_router: "10.1.0.1"
 
 # management subnet subnet mask
 mgmt_subnet_mask: "255.255.255.0"
 
 # management subnet dhcp range
-mgmt_dhcp_range: "10.145.88.150 10.145.88.160"
+mgmt_dhcp_range: "10.1.0.50 10.1.0.100"
 
 
 
@@ -163,3 +163,7 @@ compass_volume_mapping: "-v {{ compass_host_log_dir }}:{{ compass_container_log_
 # install docker on ubuntu
 docker_apt_key_server: hkp://keyserver.ubuntu.com:80
 docker_apt_key: 36A1D7869245C8950F966E92D8576A8BA88D21E9
+
+# pxe boot macs
+pxe_boot_macs: ['00:00:37:ed:95:4e', '00:00:79:ad:ce:6b', '00:00:0a:f6:6e:d7']
+test: true
