@@ -108,6 +108,8 @@
 
 - name: fork image and run a new cobbler container
   shell: docker run --name=cobbler-dev -d {{ cobbler_port_mapping }} {{ image_volume_mapping }} -i -t cobbler
+  notify:
+      restart dhcp-relay
 
 - name: extract cobbler ip info
   shell: echo `docker inspect cobbler-dev | awk -F '"' '/IPAdd/ {print $4}'` > /tmp/ip
