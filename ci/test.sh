@@ -66,7 +66,7 @@ if [[ -n $mac_array ]]
         echo "add network boot option and make pxe${i} reboot if failing"
         sudo sed -i "/<boot dev='hd'\/>/ a\    <boot dev='network'\/>" /etc/libvirt/qemu/pxe${i}.xml
         sudo sed -i "/<boot dev='network'\/>/ a\    <bios useserial='yes' rebootTimeout='0'\/>" /etc/libvirt/qemu/pxe${i}.xml
-        sudo virsh define pxe${i}
+        sudo virsh define /etc/libvirt/qemu/pxe${i}.xml
         sudo virsh start pxe${i}
         let i=i+1
     done

@@ -4,7 +4,7 @@
 rebuild: True
 
 # Auto-generated IP values
-chef_server: "10.145.89.139"
+chef_server: "10.1.0.11"
 cobbler_server: "10.1.0.11"
 compass-server: "10.1.0.11"
 
@@ -43,7 +43,7 @@ compass0_router: "192.168.100.1"
 compass0_dhcp_range: "192.168.100.150 192.168.100.160"
 
 # management subnet ip of the cluster you want to deploy
-mgmt_subnet_ip: "10.1.0.11"
+mgmt_subnet_ip: "10.1.0.0"
 
 # management subnet router ip
 mgmt_router: "10.1.0.1"

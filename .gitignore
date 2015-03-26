@@ -1,2 +1,3 @@
 install/inventories
 .vagrant
+*.pyc
