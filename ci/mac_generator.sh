@@ -7,7 +7,7 @@ function mac_address_part() {
 }
 
 function mac_address() {
-    echo "00:00:$(mac_address_part):$(mac_address_part):$(mac_address_part):$(mac_address_part)"
+    echo "'00:00:$(mac_address_part):$(mac_address_part):$(mac_address_part):$(mac_address_part)'"
 }
 
 machines=''
@@ -17,7 +17,7 @@ for i in `seq $1`; do
   if [[ -z $machines ]]; then
     machines="${mac}"
   else
-    machines="${machines}, ${mac}"
+    machines="${machines} ${mac}"
   fi  
 done
 echo ${machines}
