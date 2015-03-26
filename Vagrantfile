@@ -3,8 +3,8 @@ Vagrant.configure("2") do |config|
     compass_vm.vm.box = "precise64"
     compass_vm.vm.network :private_network, :ip=>"10.1.0.11", :libvirt__dhcp_enabled=>false
     compass_vm.vm.provider :libvirt do  |domain|
-      domain.memory = 2048
-      domain.cpus =2 
+      domain.memory = 4096
+      domain.cpus = 4 
       domain.nested =true
       domain.graphics_ip="0.0.0.0"
     end
@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
     regtest_vm.vm.box = "centos65"
     regtest_vm.vm.network :private_network, :ip=>"10.1.0.253", :libvirt__dhcp_enabled=>false
     regtest_vm.vm.provider :libvirt do |domain|
-      domain.memory = 1024
+      domain.memory = 2048
       domain.cpus = 2
       domain.nested = true
       domain.graphics_ip="0.0.0.0"
