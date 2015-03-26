@@ -154,7 +154,7 @@ func_master: overlord.example.org
 
 # change this port if Apache is not running plaintext on port
 # 80.  Most people can leave this alone.
-http_port: 8080
+http_port: 80
 
 # kernel options that should be present in every cobbler installation.
 # kernel options can also be applied at the distro/profile/system
@@ -235,7 +235,7 @@ remove_old_puppet_certs_automatically: 0
 
 # set to 1 to enable Cobbler's DHCP management features.
 # the choice of DHCP management engine is in /etc/cobbler/modules.conf
-manage_dhcp: 0
+manage_dhcp: 1
 
 # set to 1 to enable Cobbler's DNS management features.
 # the choice of DNS mangement engine is in /etc/cobbler/modules.conf

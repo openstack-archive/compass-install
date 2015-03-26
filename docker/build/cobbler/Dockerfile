@@ -105,9 +105,11 @@ RUN rm -rf /var/lib/cobbler/repo_mirror/ubuntu_ppa_repo && \
     chmod 644 /var/lib/cobbler/repo_mirror/ubuntu_ppa_repo/conf/distributions && \
     wget -O /var/lib/cobbler/repo_mirror/ubuntu_ppa_repo/chef_11.8.0-1.ubuntu.12.04_amd64.deb http://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef_11.8.0-1.ubuntu.12.04_amd64.deb
 
+ADD conf/1404_distributions /tmp/1404_distributions
+
 RUN rm -rf /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo && \
     mkdir -p /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/conf && \
-    mv /tmp/distributions /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/conf/distributions && \
+    mv /tmp/1404_distributions /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/conf/distributions && \
     chmod 644 /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/conf/distributions && \
     wget -O /var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/chef_12.1.1-1_amd64.deb https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/13.04/x86_64/chef_12.1.1-1_amd64.deb
     

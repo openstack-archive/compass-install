@@ -25,7 +25,7 @@
   with_items:
     - "{{ centos }}"
     - "{{ ubuntu }}"
-    - "{{ ubuntu_1404 }}
+    - "{{ ubuntu_1404 }}"
 
 - name: download images
   get_url: url={{ item.name }} dest=/tmp/{{ item.filename }} mode=0644

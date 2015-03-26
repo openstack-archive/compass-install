@@ -4,9 +4,9 @@
 rebuild: True
 
 # Auto-generated IP values
-chef_server: "10.145.81.208"
-cobbler_server: "10.1.0.11"
-compass-server: "10.1.0.11"
+chef_server: "10.145.89.139"
+cobbler_server: "10.145.89.139"
+compass-server: "10.145.89.139"
 
 # Auto-generated
 dockerized_cobbler: True
@@ -28,31 +28,31 @@ compass_adapters: "git://git.openstack.org/stackforge/compass-adapters.git"
 
 ## cobbler
 # cidr for docker bridge: compass0
-compass0_subnet: "192.168.101.1/24"
+compass0_subnet: "192.168.100.1/24"
 
 # subnet ip for docker bridge: compass0
-compass0_subnet_ip: "192.168.101.0"
+compass0_subnet_ip: "192.168.100.0"
 
 # subnet mask for docker bridge: compass0
 compass0_subnet_mask: "255.255.255.0"
 
 # router ip for docker bridge: compass0
-compass0_router: "192.168.101.1"
+compass0_router: "192.168.100.1"
 
 # dhcp range for docker bridge: compass0
-compass0_dhcp_range: "192.168.101.150 192.168.101.160"
+compass0_dhcp_range: "192.168.100.150 192.168.100.160"
 
 # management subnet ip of the cluster you want to deploy
-mgmt_subnet_ip: "10.1.0.0"
+mgmt_subnet_ip: "10.145.88.0"
 
 # management subnet router ip
-mgmt_router: "10.1.0.1"
+mgmt_router: "10.145.88.1"
 
 # management subnet subnet mask
-mgmt_subnet_mask: "255.255.255.0"
+mgmt_subnet_mask: "255.255.254.0"
 
 # management subnet dhcp range
-mgmt_dhcp_range: "10.1.0.50 10.1.0.100"
+mgmt_dhcp_range: "10.145.88.10 10.145.89.150"
 
 
 
