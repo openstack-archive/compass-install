@@ -1,6 +1,6 @@
 ---
 
-- hosts: allinone
+- hosts: compass_vm
   sudo: True
   roles:
     - common
