@@ -1,1 +1,22 @@
-dockerized: True
+#dockerized: True
+compass_adapter_source: http://git.openstack.org/stackforge/compass-adapters
+compass_adapter_version: dev/experimental
+epel_file_name: epel-release-6-8.noarch.rpm
+epel_base_url: http://download.fedoraproject.org/pub/epel/6/x86_64/
+epel7_base_url: http://download.fedoraproject.org/pub/epel/7/x86_64/e/
+ubuntu_14_04_ppa_repo_url: https://s3-us-west-1.amazonaws.com/compass-local-repo/ubuntu/14.04/ubuntu_14_04_ppa_repo.tar.gz
+ubuntu_ppa_repo_url: https://s3-us-west-1.amazonaws.com/compass-local-repo/ubuntu/12.04/ubuntu_12_04_ppa_repo.tar.gz
+centos_ppa_repo_url: https://s3-us-west-1.amazonaws.com/compass-local-repo/centos/6.5/centos_6_5_ppa_repo.tar.gz
+ntp: http://mirror.centos.org/centos/6.6/os/x86_64/Packages/ntp-4.2.6p5-1.el6.centos.x86_64.rpm
+ssh_client: ftp://mirror.switch.ch/pool/4/mirror/scientificlinux/6.5/x86_64/os/Packages/openssh-clients-5.3p1-94.el6.x86_64.rpm
+openssh: ftp://mirror.switch.ch/pool/4/mirror/scientificlinux/6.3/x86_64/updates/security/openssh-5.3p1-94.el6.x86_64.rpm
+iproute: ftp://mirror.switch.ch/pool/4/mirror/scientificlinux/6.5/x86_64/os/Packages/iproute-2.6.32-31.el6.x86_64.rpm
+wget: ftp://mirror.switch.ch/pool/4/mirror/scientificlinux/6.5/x86_64/os/Packages/wget-1.12-1.8.el6.x86_64.rpm
+ntpdate: http://mirror.centos.org/centos/6.6/os/x86_64/Packages/ntpdate-4.2.6p5-1.el6.centos.x86_64.rpm
+yum_priorities: ftp://mirror.switch.ch/pool/4/mirror/scientificlinux/6.3/i386/os/Packages/yum-plugin-priorities-1.1.30-14.el6.noarch.rpm
+jsonc: http://rpms.adiscon.com/v7-stable/epel-6/x86_64/RPMS/json-c-0.9-4.el6.x86_64.rpm
+libestr: http://rpms.adiscon.com/v7-stable/epel-6/x86_64/RPMS/libestr-0.1.9-1.el6.x86_64.rpm
+libgt: http://rpms.adiscon.com/v7-stable/epel-6/x86_64/RPMS/libgt-0.3.11-1.el6.x86_64.rpm
+liblogging: http://rpms.adiscon.com/v7-stable/epel-6/x86_64/RPMS/liblogging-1.0.4-1.el6.x86_64.rpm
+rsyslog: http://rpms.adiscon.com/v7-stable/epel-6/x86_64/RPMS/rsyslog-7.6.3-1.el6.src.rpm
+

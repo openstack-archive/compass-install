@@ -1,0 +1,7 @@
+---
+
+- hosts: cobbler_ansible_2
+  sudo: True
+  roles:
+    - common
+    - cobbler

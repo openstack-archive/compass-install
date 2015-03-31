@@ -1,0 +1,138 @@
+---
+
+- name: install base packages
+  yum: name={{ item }} state=present
+  with_items:
+    - wget
+    - git
+
+- name: check epel presence
+  command: rpm -q epel-release
+  register: epel_presence
+
+#- name: get epel version
+#  command: 'wget -q {{ epel_base_url }} -O - |grep -oE "(href=\"epel-release-6-[0-9,.].*)" | cut -d'"' -f2'
+#  register: epel_file_name
+#  when: epel_presence.rc != 0
+
+- name: install epel
+  yum: name={{ epel_base_url }}/{{ epel_file_name }} state=present
+  when: epel_presence.rc != 0
+
+- name: yum update
+  yum: name=* state=latest
+
+- name: install essentials
+  yum: name={{ item }} state=present
+  with_items:
+    - git
+    - python-setuptools
+    - python-devel
+    - mysql-devel
+    - httpd
+    - mysql-server
+    - mysql
+    - MySQL-python
+
+- name: start mysqld
+  service: name=mysqld state=started
+
+- name: initialize mysql password
+  mysql_user: user={{ compass_db_user }} password={{ compass_db_pass }}
+              priv=compass.*:ALL,GRANT state=present
+  tags: debug
+ 
+- name: create compass database
+  mysql_db: name=compass state=present
+
+- name: install pip
+  easy_install: name=pip
+
+- name: install virtualenv
+  pip: name=virtualenv
+
+- name: cloning compass-core
+  git: repo=http://git.openstack.org/stackforge/compass-core.git
+       dest={{ COMPASS_PATH }}
+       version=dev/experimental
+       force=yes
+
+- name: pip install compass into virtualenv
+  pip: name={{ COMPASS_PATH }} virtualenv={{ COMPASS_PATH }}/venv
+
+- name: create compass directories
+  file: path={ items } state=directory
+  with_items:
+    - /var/log/compass
+    - /etc/compass
+    - /opt/compass/bin
+    - /var/www/compass
+
+- name: write python home into switch virtualenv
+  lineinfile: dest={{ COMPASS_PATH }}/bin/switch_virtualenv.py.template
+              regexp="^virtual\_env\ \=\ \'\$PythonHome\'"
+              line="virtual_env = '/opt/compass-core/venv'"
+
+- name: rename switch_virtualenv template
+  command: cp {{ COMPASS_PATH }}/bin/switch_virtualenv.py.template {{ COMPASS_PATH }}/bin/switch_virtualenv.py
+
+- name: copy compass config files
+  command: cp -rf {{ COMPASS_PATH }}/conf/* /etc/compass/
+
+- name: copy service init file
+  command: cp -rf {{ COMPASS_PATH }}/service/* /etc/init.d/
+
+- name: copy compass bin file
+  command: cp -rf {{ COMPASS_PATH }}/bin/*.py /opt/compass/bin/
+
+- name: copy compass executable
+  command: cp {{ COMPASS_PATH }}/bin/compassd /usr/bin/
+
+- name: link compass check
+  file: src=/opt/compass/bin/compass-check.py dest=/usr/bin/compass state=link
+
+- name: link compass wsgi
+  file: src=/opt/compass/bin/compass_wsgi.py dest=/var/www/compass/compass.wsgi state=link
+
+- name: change celery env
+  command: echo "export C_FORCE_ROOT=1" > /etc/profile.d/celery_env.sh
+
+- name: change file mode
+  file: path=/etc/profile.d/celery_env.sh mode=0755
+
+- name: pip install compass into virtualenv
+  pip: name={{ COMPASS_PATH }} virtualenv={{ COMPASS_PATH }}/venv
+
+- name: add compass setting
+  template: src=compass.setting.j2 dest=/etc/compass/setting
+  notify:
+    restart compass service
+
+- name: add cobbler setting
+  template: src=cobbler.conf.j2 dest=/etc/compass/os_installer/cobbler.conf
+  notify:
+    restart compass services
+
+- name: link celery bin file
+  file: src={{ COMPASS_PATH }}/venv/bin/celeryd dest=/opt/compass/bin/celeryd state=link
+
+- name: create redis folders
+  file: path={{ item }} state=directory owner=redis
+  with_items:
+    - /var/log/redis
+    - /var/lib/redis
+    - /var/run/redis
+
+- name: make sure redis service not running
+  command: killall -9 redis-server
+
+- name: restart redis service
+  service: name=redis state=restarted
+
+- name: copy ods-server httpd config
+  copy: src=ods-server.conf dest=/etc/httpd/conf.d/ods-server.conf
+  notify:
+    restart httpd service
+
+#- name: run compass check
+#  command: compass check
