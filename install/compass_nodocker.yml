@@ -1,0 +1,8 @@
+---
+
+- hosts: compass_cobbler
+  sudo: True
+  roles:
+    - common
+    - cobbler
+    - compass
