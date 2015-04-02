@@ -11,6 +11,11 @@
   register: epel_presence
   ignore_errors: yes
 
+- name: check atomic repo presence
+  command: rpm -q atomic-release
+  register: atomic_presence
+  ignore_errors: yes
+
 #- name: get epel version
 #  command: > 
 #    wget -q {{ epel_base_url }} -O - | grep -oE "(href=\"epel-release-6-[0-9,.].*)" | cut -d\" -f2
@@ -20,6 +25,10 @@
 - name: install epel
   yum: name={{ epel_base_url }}/{{ epel_file_name }} state=present
   when: epel_presence.rc != 0
+
+- name: install atomic repo
+  yum: name={{ atomic_base_url }}/{{ atomic_file_name }} state=present
+  when: atomic_presence.rc != 0
 
 - name: yum update
   yum: name=* state=latest update_cache=yes
@@ -42,6 +51,7 @@
     - tftp-server
     - gcc
     - httpd
+    - libselinux-python
 
 - name: turn off iptables
   service: name=iptables state=stopped enabled=no
@@ -52,8 +62,12 @@
     - { name: rsync, dest: /etc/xinetd.d/rsync }
     - { name: debmirror.conf, dest: /etc/debmirror.conf }
 
+- name: restart xinetd service
+  service: name=xinetd state=restarted enabled=yes
+
 - name: configure interface for dhcp
   command: ifconfig {{ mgmt_nic }}:1 {{ mgmt_next_ip }} netmask {{ mgmt_subnet_mask }}
+  when: not mgmt_ip_same 
 
 - name: copy httpd configuration files
   file: src={{ item }} dest=/etc/httpd/conf.d/{{ item }} mode=0644
@@ -87,23 +101,40 @@
   git: repo={{ compass_adapter_source }}
        dest=/opt/compass-adapters
        version={{ compass_adapter_version }}
-       force=yes
+       update=no
+#       force=yes
 
-- name: copy snippets to cobbler folder
-  command: cp -r /opt/compass-adapters/cobbler/{{ item }} /var/lib/cobbler/{{ item }}
+- name: remove old cobbler folders
+  shell: rm -rf path=/var/lib/cobbler/{{ item }}
   with_items:
     - snippets
     - scripts
     - triggers
+    - kickstarts
+
+- name: create cobbler folders
+  file: path=/var/lib/cobbler/{{ item }} state=directory mode=0755
+  with_items:
+    - snippets
+    - scripts
+    - triggers
+    - kickstarts
+
+- name: copy snippets to cobbler folder
+  shell: cp -rf /opt/compass-adapters/cobbler/{{ item }}/* /var/lib/cobbler/{{ item }}/
+  with_items:
+    - snippets
+    - scripts
+    - triggers
+    - kickstarts
+  notify:
+    cobbler sync
 
 - name: change snippets mode
   file: path=/var/lib/cobbler mode=0755 recurse=yes
 
-- name: copy default kickstart files
-  command: cp -r /opt/compass-adapters/cobbler/kickstarts/{{ item }} /var/lib/cobbler/kickstarts/{{ item }}
-  with_items:
-    - default.ks
-    - default.seed
+- name: create cblr_ks folder
+  file: path=/var/www/cblr_ks mode=0755 state=directory
 
 - name: change kickstart mode
   file: path=/var/lib/cobbler/kickstarts mode=0666 recurse=yes
@@ -115,48 +146,30 @@
   command: echo 0 > /selinux/enforce
 
 - name: create cobbler log directories
-  file: path={{ item }} mode=0644 state=directory recurse=yes
+  file: path={{ item }} mode=0777 state=directory recurse=yes
   with_items:
-#    - /var/log/cobbler
+    - /var/log/cobbler
     - /var/log/cobbler/anamon
     - /var/log/cobbler/tasks
 
 - name: create cobbler ppa repo dir
-  file: path=/var/lib/cobbler/{{ item }}
+  file: path=/var/lib/cobbler/repo_mirror/{{ item.ppa_repo_name }}/conf
         state=directory
         mode=0644
         recurse=yes
-  with_items:
-    - repo_mirror/centos_6_5_ppa_repo
-    - repo_mirror/ubuntu_12_04_ppa_repo/conf
-    - repo_mirror/ubuntu_14_04_ppa_repo/conf
-
-#- name: download centos ppa repo rpms
-#  get_url: url={{ item }}
-#           dest=/var/lib/cobbler/repo_mirror/centos_6_5_ppa_repo/
-#  with_items:
-#    - "{{ ntp }}"
-#    - "{{ ssh_client }}"
-#    - "{{ openssh }}"
-#    - "{{ iproute }}"
-#    - "{{ wget }}"
-#    - "{{ ntpdate }}"
-#    - "{{ yum_priorities }}"
-#    - "{{ jsonc }}"
-#    - "{{ libestr }}"
-#    - "{{ libgt }}"
-#    - "{{ liblogging }}"
-#    - "{{ rsyslog }}"
+  with_items: distros
 
 - name: copy distributions to ubuntu ppa repo
   template: src=distributions
         dest=/var/lib/cobbler/repo_mirror/ubuntu_12_04_ppa_repo/conf/distributions
         mode=0644
+  when: ubuntu_1204 in distros
 
 - name: copy distribution to ubuntu 14.04 ppa repo
   template: src=distributions
         dest=/var/lib/cobbler/repo_mirror/ubuntu_14_04_ppa_repo/conf/distributions
         mode=0644
+  when: ubuntu_1404 in distros
 
 - name: start cobbler and httpd services
   service: name={{ item }} state=restarted enabled=yes
@@ -165,34 +178,39 @@
     - cobblerd
 
 - name: download ppa repo images
-  get_url: url={{ item.name }} dest=/var/lib/cobbler/repo_mirror/{{ item.filename }}.tar.gz
-  with_items:
-    - { name: "{{ centos_6_5_ppa_repo_url }}", filename: "centos_6_5_ppa_repo" }
-    - { name: "{{ ubuntu_12_04_ppa_repo_url }}", filename: "ubuntu_12_04_ppa_repo" }
-    - { name: "{{ ubuntu_14_04_ppa_repo_url }}", filename: "ubuntu_14_04_ppa_repo" }
+  get_url: url={{ item.ppa_lab_url }} dest=/var/lib/cobbler/repo_mirror/{{ item.ppa_repo_name }}.tar.gz
+  with_items: distros
+  when: region == "lab"
+
+- name: download ppa repo images
+  get_url: url={{ item.ppa_us_url }} dest=/var/lib/cobbler/repo_mirror/{{ item.ppa_repo_name }}.tar.gz
+  with_items: distros
+  when: region == "us"
 
 - name: untar ppa repo images
-  unarchive: src=/var/lib/cobbler/repo_mirror/{{ item }}.tar.gz
+  unarchive: src=/var/lib/cobbler/repo_mirror/{{ item.ppa_repo_name }}.tar.gz
              dest=/var/lib/cobbler/repo_mirror/
              copy=no
-  with_items:
-    - centos_6_5_ppa_repo
-    - ubuntu_12_04_ppa_repo
-    - ubuntu_14_04_ppa_repo
+  with_items: distros
 
 - name: add repos
-  command: cobbler repo add --name {{ item }} --mirror=/var/lib/cobbler/repo_mirror/{{ item }} --mirror-locally=Y --arch=x86_64
-  with_items:
-    - centos_6_5_ppa_repo
-    - ubuntu_12_04_ppa_repo
-    - ubuntu_14_04_ppa_repo
+  command: cobbler repo add --name {{ item.ppa_repo_name }} --mirror=/var/lib/cobbler/repo_mirror/{{ item.ppa_repo_name }} --mirror-locally=Y --arch=x86_64
+  with_items: distros
   args:
     creates: /opt/repo_added.txt
   ignore_errors: yes
+  run_once: True
 
 - name: cobbler repo sync
   command: cobbler reposync
 
+- name: download loader files
+  get_url: url={{ cobbler_loaders_url }} dest=/var/lib/cobbler/
+
+- name: untar loaders file
+  unarchive: src=/var/lib/cobbler/loaders.tar.gz dest=/var/lib/cobbler/ 
+             copy=no
+ 
 - name: cobbler get loaders
   command: cobbler get-loaders
 
@@ -200,62 +218,66 @@
   file: path=/var/lib/cobbler/iso state=directory
 
 - name: download images
-  get_url: url={{ item.name }} dest=/var/lib/cobbler/iso/{{ item.filename }} mode=0644
-  with_items:
-    - { name: "{{ centos_url }}", filename: "{{ centos }}.iso" }
-    - { name: "{{ ubuntu_url }}", filename: "{{ ubuntu }}.iso" }
-    - { name: "{{ ubuntu_1404_url }}", filename: "{{ ubuntu_1404 }}.iso" }
+  get_url: url={{ item.iso_lab_url }} dest=/var/lib/cobbler/iso/{{ item.name }}.iso mode=0644
+  with_items: distros
+  when: region == "lab"
+
+- name: download images
+  get_url: url={{ item.iso_us_url }} dest=/var/lib/cobbler/iso/{{ item.name }}.iso mode=0644
+  with_items: distros
+  when: region == "us"
 
 - name: mount_info
   command: mount
   register: mount_info
 
 - name: create mount point
-  file: name=/mnt/{{ item }} state=directory
-  with_items:
-    - "{{ centos }}"
-    - "{{ ubuntu }}"
-    - "{{ ubuntu_1404 }}"
-  when: mount_info.stdout.find('CentOS') == -1
+  file: name=/mnt/{{ item.name }} state=directory
+  with_items: distros
+  when: mount_info.stdout.find('CentOS') == -1 and mount_info.stdout.find('Ubuntu') == -1
+  ignore_errors: yes
 
 - name: mount images
-  shell: mount -o loop /var/lib/cobbler/iso/{{ item }}.iso /mnt/{{ item }}
-  with_items:
-    - "{{ centos }}"
-    - "{{ ubuntu }}"
-    - "{{ ubuntu_1404 }}"
-  when: mount_info.stdout.find('CentOS') == -1
+  shell: mount -o loop /var/lib/cobbler/iso/{{ item.name }}.iso /mnt/{{ item.name }}
+  with_items: distros
+  when: mount_info.stdout.find('CentOS') == -1 and mount_info.stdout.find('Ubuntu') == -1
   args:
     creates: /opt/image_mounted.txt
+  ignore_errors: yes
+  run_once: True
 
 - name: import distros
   command: cobbler import --path=/mnt/{{ item.name }} --name {{ item.name }} --arch=x86_64 --kickstart=/var/lib/cobbler/kickstarts/default.ks --breed={{ item.breed }}
-  with_items:
-    - { name: "{{ centos }}", breed: redhat }
-    - { name: "{{ ubuntu }}", breed: ubuntu }
-    - { name: "{{ ubuntu_1404 }}", breed: ubuntu }
+  with_items: distros
   args:
     creates: /opt/distro_imported.txt
   ignore_errors: yes
   run_once: True
 
-- name: add profiles
-  command: cobbler profile add --name={{ item.name }} --repo={{ item.repo }} --distro={{ item.name }} --ksmeta="tree=http://{{ mgmt_next_ip }}/cobbler/ks_mirror/{{ item.name }}" --kickstart=/var/lib/cobbler/kickstarts/{{ item.kickstart }} --kopts="{{ item.kopts }}"
-  with_items:
-    - { name: "{{ centos }}", repo: centos_6_5_ppa_repo, kickstart: default.ks, kopts: "" }
-    - { name: "{{ ubuntu }}", repo: ubuntu_12_04_ppa_repo, kickstart: default.seed, kopts: "netcfg/choose_interface=auto" }
-    - { name: "{{ ubuntu_1404 }}", repo: ubuntu_14_04_ppa_repo, kickstart: default.seed, kopts: "netcfg/choose_interface=auto"}
-  args:
-    creates: /opt/profile_added.txt
-  ignore_errors: yes
-  run_once: True
+#- name: add profiles
+#  command: cobbler profile add --name={{ item.name }} --repo={{ item.ppa_repo_name }} --distro={{ item.name }} --ksmeta="tree=http://{{ mgmt_next_ip }}/cobbler/ks_mirror/{{ item.name }}" --kickstart=/var/lib/cobbler/kickstarts/{{ item.kickstart }} --kopts="{{ item.kopts }}"
+#  with_items: distros
+#  args:
+#    creates: /opt/profile_added.txt
+#  ignore_errors: yes
+#  run_once: True
+
+- name: generate public key file for ssh
+  template: src=id_rsa.pub.j2 dest=/var/lib/cobbler/id_rsa.pub
+  when: push_ssh_key is defined
+
+- name: generate ssh key for root
+  user: name=root generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
+  when: push_ssh_key is not defined
 
 - name: edit profiles
-  command: cobbler profile edit --name={{ item.name }} --repo={{ item.repo }} --distro={{ item.name }} --ksmeta="tree=http://{{ mgmt_next_ip }}/cobbler/ks_mirror/{{ item.name }}" --kickstart=/var/lib/cobbler/kickstarts/{{ item.kickstart }} --kopts="{{ item.kopts }}"
-  with_items:
-    - { name: "{{ centos }}", repo: centos_6_5_ppa_repo, kickstart: default.ks, kopts: "" }
-    - { name: "{{ ubuntu }}", repo: ubuntu_12_04_ppa_repo, kickstart: default.seed, kopts: "netcfg/choose_interface=auto" }
-    - { name: "{{ ubuntu_1404 }}", repo: ubuntu_14_04_ppa_repo, kickstart: default.seed, kopts: "netcfg/choose_interface=auto"}
+  shell: cobbler profile edit --name={{ item.name }} --repo={{ item.ppa_repo_name }} --distro={{ item.name }} --ksmeta="tree=http://{{ mgmt_next_ip }}/cobbler/ks_mirror/{{ item.name }}" --kickstart=/var/lib/cobbler/kickstarts/{{ item.kickstart }} --kopts="{{ item.kopts }}"
+  with_items: distros
+
+- name: edit profiles with push ssh key option
+  shell: cobbler profile edit --name={{ item.name }} --repo={{ item.ppa_repo_name }} --distro={{ item.name }} --ksmeta="tree=http://{{ mgmt_next_ip }}/cobbler/ks_mirror/{{ item.name }} push_ssh_keys=/var/lib/cobbler/id_rsa.pub" --kickstart=/var/lib/cobbler/kickstarts/{{ item.kickstart }} --kopts="{{ item.kopts }}"
+  with_items: distros
+  when: push_ssh_key is defined
 
 - name: remove ubuntu default repo
   command: cobbler repo remove --name {{ item }}
@@ -265,10 +287,16 @@
   ignore_errors: yes
 
 - name: cobbler repo sync again
-  command: cobbler reposync
+  shell: cobbler reposync
 
-- name: cobler sync
-  command: cobbler sync
+- name: cobbler sync
+  shell: cobbler sync
+
+- name: restart xinetd
+  service: name=xinetd state=restarted
+
+- name: restart dhcpd
+  service: name=dhcpd state=restarted
 
 - name: cobbler check
-  command: cobbler check
+  shell: cobbler check
