@@ -13,7 +13,7 @@ ddns-update-style interim;
 allow booting;
 allow bootp;
 deny unknown-clients;
-local-address {{ internal_ip }};
+local-address {{ cobbler_server }};
 log-facility local6;
 
 ignore client-updates;
@@ -26,6 +26,7 @@ option pxelinux.configfile code 209 = text;
 option pxelinux.pathprefix code 210 = text;
 option pxelinux.reboottime code 211 = unsigned integer 32;
 
+{% if dockerized %}
 subnet {{ compass0_subnet_ip }} netmask {{ compass0_subnet_mask }} {
      option routers {{ compass0_router }};
      option domain-name-servers {{ compass0_router }};
@@ -48,6 +49,7 @@ subnet {{ compass0_subnet_ip }} netmask {{ compass0_subnet_mask }} {
      }
 
 }
+{% endif %}
 
 subnet {{ mgmt_subnet_ip }} netmask {{ mgmt_subnet_mask }} {
      option routers {{ mgmt_router }};
