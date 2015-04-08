@@ -145,6 +145,9 @@
 - name: disable selinux real time
   command: echo 0 > /selinux/enforce
 
+- name: clean cobbler log folder
+  file: path=/var/log/cobbler state=absent
+
 - name: create cobbler log directories
   file: path={{ item }} mode=0777 state=directory recurse=yes
   with_items:
@@ -200,6 +203,13 @@
     creates: /opt/repo_added.txt
   ignore_errors: yes
   run_once: True
+
+- name: remove ubuntu default repo
+  command: cobbler repo remove --name {{ item }}
+  with_items:
+    - "{{ ubuntu }}"
+    - "{{ ubuntu_1404 }}"
+  ignore_errors: yes
 
 - name: cobbler repo sync
   command: cobbler reposync
@@ -296,7 +306,16 @@
   service: name=xinetd state=restarted
 
 - name: restart dhcpd
-  service: name=dhcpd state=restarted
+  service: name=dhcpd state=restarted enabled=yes
 
 - name: cobbler check
   shell: cobbler check
+
+- name: get all systems
+  shell: cobbler system list
+  register: cobbler_systems
+
+- name: remove all systems
+  shell: cobbler system remove --name {{ item }}
+  with_items: cobbler_systems.stdout_lines
+  when: cobbler_systems and test is defined and test == True
