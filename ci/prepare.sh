@@ -8,7 +8,7 @@ if [[ $? != 0 ]]; then
 else
     echo "vagrant is already installed"
 fi
-sudo apt-get install libxslt-dev libxml2-dev libvirt-dev build-essential qemu-utils qemu-kvm libvirt-bin virtinst -y
+sudo apt-get install libxslt-dev libxml2-dev libvirt-dev build-essential qemu-utils qemu-kvm libvirt-bin virtinst libmysqld-dev -y
 sudo service libvirt-bin restart
 
 for plugin in vagrant-libvirt vagrant-mutate; do
