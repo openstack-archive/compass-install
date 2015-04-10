@@ -222,14 +222,4 @@ atomic_base_url: http://www6.atomicorp.com/channels/atomic/centos/6/x86_64/RPMS/
 
 # the key to be authorized on pxe boot machines so passwordless login can be
 # done from the machine where you grab the key.
-push_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUuKnIXwxS9w+Rxb4+CL3iqNQXB+kriQyr89YeLg5X7B0h+r91okw2bgodVvoynH8n7d7afHYew4KH7pMc5a3QMf/gwhhnlfoeyimQg0IOTQ6pvNxifRi5IN9xa3mB3kL9/xVmfo9rUE6ZZ4dNQ91As706SLBzEJWUuICT7fFJqCqHbxNT9aO//TWcoJJH+d+GLfLagyfVxBHb8DcoNSKTq1rFjZCFVs9pg6aO0d6Z3FcyICxOaacsAoRZOsx8+2WsHaZRk6udbqZJHt7LBs9Bc38+YCRhc31Q2jyrm37xT3QchRl4sihqq38N03cTYBksuRfV1dJaso9MUQapa/Lv root@host-1"
-pxe_boot_macs: ['00:00:3a:52:a0:02','00:00:06:e0:08:54']
-test: true
-pxe_boot_macs: ['00:00:5b:61:07:1f','00:00:b9:ae:f7:d1']
-test: true
-pxe_boot_macs: ['00:00:d9:0b:2f:ba','00:00:da:39:7f:58']
-test: true
-pxe_boot_macs: ['00:00:d3:8e:8b:d2','00:00:ac:29:c5:98']
-test: true
-pxe_boot_macs: ['00:00:1d:46:1e:6e','00:00:99:f1:c2:ac']
-test: true
+#push_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUuKnIXwxS9w+Rxb4+CL3iqNQXB+kriQyr89YeLg5X7B0h+r91okw2bgodVvoynH8n7d7afHYew4KH7pMc5a3QMf/gwhhnlfoeyimQg0IOTQ6pvNxifRi5IN9xa3mB3kL9/xVmfo9rUE6ZZ4dNQ91As706SLBzEJWUuICT7fFJqCqHbxNT9aO//TWcoJJH+d+GLfLagyfVxBHb8DcoNSKTq1rFjZCFVs9pg6aO0d6Z3FcyICxOaacsAoRZOsx8+2WsHaZRk6udbqZJHt7LBs9Bc38+YCRhc31Q2jyrm37xT3QchRl4sihqq38N03cTYBksuRfV1dJaso9MUQapa/Lv root@host-1"

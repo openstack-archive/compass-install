@@ -91,6 +91,11 @@
   pip: name={{ COMPASS_PATH }} virtualenv={{ COMPASS_PATH }}/venv
        extra_args='-i http://pypi.douban.com/simple/'
 
+- name: pip install ansible
+  pip: name=ansible virtualenv={{ COMPASS_PATH }}/venv
+       extra_args='-i http://pypi.douban.com/simple/'
+       state=latest
+
 - name: create compass directories
   file: path={{ item }} state=directory
   with_items:
@@ -101,6 +106,21 @@
 
 - name: create /var/log/compass
   file: path=/var/log/compass mode=0777 state=directory
+
+- name: create ansible folder
+  file: path=/var/ansible/run state=directory
+  when: "'ansible' in {{ pkg_installer }}"
+
+- name: clone recipes
+  git: repo={{ compass_adapter_source }}
+       dest=/opt/compass-adapters
+       version={{ compass_adapter_version }}
+       update=yes
+       force=yes
+
+- name: copy ansible scripts into ansible folder
+  shell: cp -rf /opt/compass-adapters/ansible/openstack_juno /var/ansible/.
+  when: "'ansible' in {{ pkg_installer }}"
 
 - name: write python home into switch virtualenv
   lineinfile: dest={{ COMPASS_PATH }}/bin/switch_virtualenv.py.template
@@ -142,7 +162,6 @@
   notify:
     - restart compass service
     - restart http service
-  tags: debug
 
 - name: add cobbler setting
   template: src=cobbler.conf.nodocker.j2 dest=/etc/compass/os_installer/cobbler.conf
