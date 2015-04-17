@@ -91,8 +91,13 @@
   pip: name={{ COMPASS_PATH }} virtualenv={{ COMPASS_PATH }}/venv
        extra_args='-i http://pypi.douban.com/simple/'
 
+- name: pip install latest setuptools
+  pip: name=setuptools
+       extra_args='-i http://pypi.douban.com/simple/'
+       state=latest
+
 - name: pip install ansible
-  pip: name=ansible virtualenv={{ COMPASS_PATH }}/venv
+  pip: name=ansible
        extra_args='-i http://pypi.douban.com/simple/'
        state=latest
 
