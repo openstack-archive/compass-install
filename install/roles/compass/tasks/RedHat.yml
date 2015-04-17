@@ -96,6 +96,11 @@
        extra_args='-i http://pypi.douban.com/simple/'
        state=latest
 
+- name: pip install latest setuptools2
+  pip: name=setuptools
+       extra_args='-i http://pypi.douban.com/simple/'
+       state=latest
+
 - name: pip install ansible
   pip: name=ansible
        extra_args='-i http://pypi.douban.com/simple/'
