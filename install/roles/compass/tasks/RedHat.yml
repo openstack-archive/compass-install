@@ -152,6 +152,9 @@
 - name: copy compass shell script
   shell: cp -rf {{ COMPASS_PATH }}/bin/*.sh /opt/compass/bin/
 
+- name: copy compass ansible callback
+  shell: cp -rf {{ COMPASS_PATH }}/bin/ansible_callbacks /opt/compass/bin/
+
 - name: copy compass executable
   shell: cp {{ COMPASS_PATH }}/bin/compassd /usr/bin/
 
